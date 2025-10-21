@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Numerics;
@@ -12,19 +13,17 @@ namespace Vdovin.MultithreadingLab
         public MainWindow()
         {
             InitializeComponent();
-
-            calculator.FactorialComplete += OnFactorialComplete;
-            calculator.FactorialMinusOneComplete += OnFactorialMinusOneComplete;
-            calculator.AddTwoComplete += OnAddTwoComplete;
-            calculator.LoopComplete += OnLoopComplete;
         }
 
         private async void BtnFactorial_Click(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
-                calculator.varFact1 = value;
-                await Task.Run(() => calculator.StartFactorialAsync());
+                var sw = Stopwatch.StartNew();
+                var result = await calculator.ComputeFactorialAsync(value);
+                sw.Stop();
+
+                UpdateUI(result.ToString(), calculator.varTotalCalculations, sw.Elapsed.TotalMilliseconds, result.ToString().Length);
             }
         }
 
@@ -32,8 +31,11 @@ namespace Vdovin.MultithreadingLab
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
-                calculator.varFact2 = value;
-                await Task.Run(() => calculator.StartFactorialMinusOneAsync());
+                var sw = Stopwatch.StartNew();
+                var result = await calculator.ComputeFactorialMinusOneAsync(value);
+                sw.Stop();
+
+                UpdateUI(result.ToString(), calculator.varTotalCalculations, sw.Elapsed.TotalMilliseconds, result.ToString().Length);
             }
         }
 
@@ -41,8 +43,11 @@ namespace Vdovin.MultithreadingLab
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
-                calculator.varAddTwo = value;
-                await Task.Run(() => calculator.StartAddTwoAsync());
+                var sw = Stopwatch.StartNew();
+                var result = await calculator.ComputeAddTwoAsync(value);
+                sw.Stop();
+
+                UpdateUI(result.ToString(), calculator.varTotalCalculations, sw.Elapsed.TotalMilliseconds, null);
             }
         }
 
@@ -50,30 +55,12 @@ namespace Vdovin.MultithreadingLab
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
-                calculator.varLoopValue = value;
-                await Task.Run(() => calculator.StartLoopAsync());
+                var sw = Stopwatch.StartNew();
+                var total = await calculator.ComputeLoopAsync(value);
+                sw.Stop();
+
+                UpdateUI($"Цикл завершён ({value} итераций)", total, sw.Elapsed.TotalMilliseconds, null);
             }
-        }
-
-        // Обработчики событий — обновление UI через Dispatcher
-        private void OnFactorialComplete(BigInteger result, double total, double duration)
-        {
-            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, result.ToString().Length));
-        }
-
-        private void OnFactorialMinusOneComplete(BigInteger result, double total, double duration)
-        {
-            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, result.ToString().Length));
-        }
-
-        private void OnAddTwoComplete(int result, double total, double duration)
-        {
-            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, null));
-        }
-
-        private void OnLoopComplete(double total, int count, double duration)
-        {
-            Dispatcher.Invoke(() => UpdateUI($"Цикл завершён ({count} итераций)", total, duration, null));
         }
 
         private void UpdateUI(string status, double total, double duration, int? digitCount)
