@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vdovin.MultithreadingLab", "Vdovin.MultithreadingLab\Vdovin.MultithreadingLab.csproj", "{F319BD32-2128-4700-800B-C86C920A733F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F319BD32-2128-4700-800B-C86C920A733F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F319BD32-2128-4700-800B-C86C920A733F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F319BD32-2128-4700-800B-C86C920A733F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F319BD32-2128-4700-800B-C86C920A733F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CB1FF56F-78C8-403C-BC72-F426B17DD0BF}
+	EndGlobalSection
+EndGlobal
