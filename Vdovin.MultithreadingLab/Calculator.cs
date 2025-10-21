@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
-using System.Numerics; // ← Добавь это
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Vdovin.MultithreadingLab
 {
@@ -13,13 +13,14 @@ namespace Vdovin.MultithreadingLab
         public int varLoopValue;
         public static double varTotalCalculations = 0;
 
-        // События: теперь используют BigInteger для результата факториала
+        // События: результат + общее число вычислений + время (мс)
         public event Action<BigInteger, double, double> FactorialComplete;
         public event Action<BigInteger, double, double> FactorialMinusOneComplete;
         public event Action<int, double, double> AddTwoComplete;
         public event Action<double, int, double> LoopComplete;
 
-        public void Factorial()
+        // Методы запуска задач
+        public async Task StartFactorialAsync()
         {
             var sw = Stopwatch.StartNew();
             BigInteger result = 1;
@@ -37,13 +38,12 @@ namespace Vdovin.MultithreadingLab
             FactorialComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
-        public void FactorialMinusOne()
+        public async Task StartFactorialMinusOneAsync()
         {
             var sw = Stopwatch.StartNew();
             BigInteger result = 1;
             double totalNow = 0;
-            int limit = varFact2 - 1;
-            if (limit < 0) limit = 0;
+            int limit = Math.Max(0, varFact2 - 1);
             for (int i = 1; i <= limit; i++)
             {
                 result *= i;
@@ -57,7 +57,7 @@ namespace Vdovin.MultithreadingLab
             FactorialMinusOneComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
-        public void AddTwo()
+        public async Task StartAddTwoAsync()
         {
             var sw = Stopwatch.StartNew();
             int result = varAddTwo + 2;
@@ -71,7 +71,7 @@ namespace Vdovin.MultithreadingLab
             AddTwoComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
-        public void RunALoop()
+        public async Task StartLoopAsync()
         {
             var sw = Stopwatch.StartNew();
             double totalNow = 0;
@@ -86,6 +86,7 @@ namespace Vdovin.MultithreadingLab
                     }
                 }
             }
+            sw.Stop();
             sw.Stop();
             LoopComplete?.Invoke(totalNow, varLoopValue, sw.Elapsed.TotalMilliseconds);
         }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Numerics;
 
@@ -19,101 +19,70 @@ namespace Vdovin.MultithreadingLab
             calculator.LoopComplete += OnLoopComplete;
         }
 
-        private void BtnFactorial_Click(object sender, RoutedEventArgs e)
+        private async void BtnFactorial_Click(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
                 calculator.varFact1 = value;
-                Thread t = new Thread(calculator.Factorial);
-                t.IsBackground = true;
-                t.Start();
+                await Task.Run(() => calculator.StartFactorialAsync());
             }
         }
 
-        private void BtnFactorialMinus_Click(object sender, RoutedEventArgs e)
+        private async void BtnFactorialMinus_Click(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
                 calculator.varFact2 = value;
-                Thread t = new Thread(calculator.FactorialMinusOne);
-                t.IsBackground = true;
-                t.Start();
+                await Task.Run(() => calculator.StartFactorialMinusOneAsync());
             }
         }
 
-        private void BtnAddTwo_Click(object sender, RoutedEventArgs e)
+        private async void BtnAddTwo_Click(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
                 calculator.varAddTwo = value;
-                Thread t = new Thread(calculator.AddTwo);
-                t.IsBackground = true;
-                t.Start();
+                await Task.Run(() => calculator.StartAddTwoAsync());
             }
         }
 
-        private void BtnLoop_Click(object sender, RoutedEventArgs e)
+        private async void BtnLoop_Click(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(txtValue.Text, out int value))
             {
                 calculator.varLoopValue = value;
-                Thread t = new Thread(calculator.RunALoop);
-                t.IsBackground = true;
-                t.Start();
+                await Task.Run(() => calculator.StartLoopAsync());
             }
         }
 
+        // Обработчики событий — обновление UI через Dispatcher
         private void OnFactorialComplete(BigInteger result, double total, double duration)
         {
-            Dispatcher.Invoke(() =>
-            {
-                // Не выводим всё число — только длину и пример
-                string preview = result.ToString();
-                if (preview.Length > 50)
-                    preview = preview.Substring(0, 50) + "...";
-
-                lblStatus.Text = $"Факториал: {preview}";
-                lblDigits.Text = $"Количество цифр: {result.ToString().Length}";
-                lblTotal.Text = $"Всего вычислений: {total}";
-                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
-            });
+            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, result.ToString().Length));
         }
 
         private void OnFactorialMinusOneComplete(BigInteger result, double total, double duration)
         {
-            Dispatcher.Invoke(() =>
-            {
-                string preview = result.ToString();
-                if (preview.Length > 50)
-                    preview = preview.Substring(0, 50) + "...";
-
-                lblStatus.Text = $"Факториал-1: {preview}";
-                lblDigits.Text = $"Количество цифр: {result.ToString().Length}";
-                lblTotal.Text = $"Всего вычислений: {total}";
-                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
-            });
+            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, result.ToString().Length));
         }
 
         private void OnAddTwoComplete(int result, double total, double duration)
         {
-            Dispatcher.Invoke(() =>
-            {
-                lblStatus.Text = $"Прибавить 2: {result}";
-                lblDigits.Text = "";
-                lblTotal.Text = $"Всего вычислений: {total}";
-                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
-            });
+            Dispatcher.Invoke(() => UpdateUI(result.ToString(), total, duration, null));
         }
 
         private void OnLoopComplete(double total, int count, double duration)
         {
-            Dispatcher.Invoke(() =>
-            {
-                lblStatus.Text = $"Цикл завершён ({count} итераций)";
-                lblDigits.Text = "";
-                lblTotal.Text = $"Всего вычислений: {total}";
-                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
-            });
+            Dispatcher.Invoke(() => UpdateUI($"Цикл завершён ({count} итераций)", total, duration, null));
+        }
+
+        private void UpdateUI(string status, double total, double duration, int? digitCount)
+        {
+            string preview = status.Length > 50 ? status.Substring(0, 50) + "..." : status;
+            lblStatus.Text = preview;
+            lblTotal.Text = $"Всего вычислений: {total}";
+            lblDuration.Text = $"Время выполнения: {duration:F2} мс";
+            lblDigits.Text = digitCount.HasValue ? $"Количество цифр: {digitCount}" : "";
         }
     }
 }
