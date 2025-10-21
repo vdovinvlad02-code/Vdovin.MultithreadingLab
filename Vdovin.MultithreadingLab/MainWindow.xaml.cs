@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
+using System.Numerics;
 
 namespace Vdovin.MultithreadingLab
 {
@@ -62,39 +63,56 @@ namespace Vdovin.MultithreadingLab
             }
         }
 
-        private void OnFactorialComplete(double result, double total)
+        private void OnFactorialComplete(BigInteger result, double total, double duration)
         {
             Dispatcher.Invoke(() =>
             {
-                lblStatus.Text = $"Факториал: {result}";
+                // Не выводим всё число — только длину и пример
+                string preview = result.ToString();
+                if (preview.Length > 50)
+                    preview = preview.Substring(0, 50) + "...";
+
+                lblStatus.Text = $"Факториал: {preview}";
+                lblDigits.Text = $"Количество цифр: {result.ToString().Length}";
                 lblTotal.Text = $"Всего вычислений: {total}";
+                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
             });
         }
 
-        private void OnFactorialMinusOneComplete(double result, double total)
+        private void OnFactorialMinusOneComplete(BigInteger result, double total, double duration)
         {
             Dispatcher.Invoke(() =>
             {
-                lblStatus.Text = $"Факториал-1: {result}";
+                string preview = result.ToString();
+                if (preview.Length > 50)
+                    preview = preview.Substring(0, 50) + "...";
+
+                lblStatus.Text = $"Факториал-1: {preview}";
+                lblDigits.Text = $"Количество цифр: {result.ToString().Length}";
                 lblTotal.Text = $"Всего вычислений: {total}";
+                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
             });
         }
 
-        private void OnAddTwoComplete(int result, double total)
+        private void OnAddTwoComplete(int result, double total, double duration)
         {
             Dispatcher.Invoke(() =>
             {
                 lblStatus.Text = $"Прибавить 2: {result}";
+                lblDigits.Text = "";
                 lblTotal.Text = $"Всего вычислений: {total}";
+                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
             });
         }
 
-        private void OnLoopComplete(double total, int count)
+        private void OnLoopComplete(double total, int count, double duration)
         {
             Dispatcher.Invoke(() =>
             {
                 lblStatus.Text = $"Цикл завершён ({count} итераций)";
+                lblDigits.Text = "";
                 lblTotal.Text = $"Всего вычислений: {total}";
+                lblDuration.Text = $"Время выполнения: {duration:F2} мс";
             });
         }
     }

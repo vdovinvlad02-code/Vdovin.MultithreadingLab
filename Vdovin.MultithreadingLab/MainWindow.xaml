@@ -1,9 +1,11 @@
 ﻿<Window x:Class="Vdovin.MultithreadingLab.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Многопоточность" Height="350" Width="400">
+        Title="Многопоточность" Height="450" Width="500">
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -22,5 +24,7 @@
 
         <TextBlock x:Name="lblStatus" Grid.Row="5" Margin="5" TextWrapping="Wrap"/>
         <TextBlock x:Name="lblTotal" Grid.Row="6" Margin="5" TextWrapping="Wrap"/>
+        <TextBlock x:Name="lblDuration" Grid.Row="7" Margin="5" TextWrapping="Wrap"/>
+        <TextBlock x:Name="lblDigits" Grid.Row="8" Margin="5" TextWrapping="Wrap"/>
     </Grid>
 </Window>

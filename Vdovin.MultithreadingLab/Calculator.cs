@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
+using System.Numerics; // ← Добавь это
 
 namespace Vdovin.MultithreadingLab
 {
     public class Calculator
     {
-        // Общие переменные
         public int varAddTwo;
         public int varFact1;
         public int varFact2;
         public int varLoopValue;
         public static double varTotalCalculations = 0;
 
-        // События для обновления UI
-        public event Action<double, double> FactorialComplete;
-        public event Action<double, double> FactorialMinusOneComplete;
-        public event Action<int, double> AddTwoComplete;
-        public event Action<double, int> LoopComplete;
+        // События: теперь используют BigInteger для результата факториала
+        public event Action<BigInteger, double, double> FactorialComplete;
+        public event Action<BigInteger, double, double> FactorialMinusOneComplete;
+        public event Action<int, double, double> AddTwoComplete;
+        public event Action<double, int, double> LoopComplete;
 
-        // Методы вычислений
         public void Factorial()
         {
-            double result = 1;
+            var sw = Stopwatch.StartNew();
+            BigInteger result = 1;
             double totalNow = 0;
             for (int i = 1; i <= varFact1; i++)
             {
@@ -32,14 +33,18 @@ namespace Vdovin.MultithreadingLab
                     totalNow = varTotalCalculations;
                 }
             }
-            FactorialComplete?.Invoke(result, totalNow);
+            sw.Stop();
+            FactorialComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
         public void FactorialMinusOne()
         {
-            double result = 1;
+            var sw = Stopwatch.StartNew();
+            BigInteger result = 1;
             double totalNow = 0;
-            for (int i = 1; i <= varFact2 - 1; i++)
+            int limit = varFact2 - 1;
+            if (limit < 0) limit = 0;
+            for (int i = 1; i <= limit; i++)
             {
                 result *= i;
                 lock (this)
@@ -48,11 +53,13 @@ namespace Vdovin.MultithreadingLab
                     totalNow = varTotalCalculations;
                 }
             }
-            FactorialMinusOneComplete?.Invoke(result, totalNow);
+            sw.Stop();
+            FactorialMinusOneComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
         public void AddTwo()
         {
+            var sw = Stopwatch.StartNew();
             int result = varAddTwo + 2;
             double totalNow;
             lock (this)
@@ -60,11 +67,13 @@ namespace Vdovin.MultithreadingLab
                 varTotalCalculations++;
                 totalNow = varTotalCalculations;
             }
-            AddTwoComplete?.Invoke(result, totalNow);
+            sw.Stop();
+            AddTwoComplete?.Invoke(result, totalNow, sw.Elapsed.TotalMilliseconds);
         }
 
         public void RunALoop()
         {
+            var sw = Stopwatch.StartNew();
             double totalNow = 0;
             for (int i = 1; i <= varLoopValue; i++)
             {
@@ -77,7 +86,8 @@ namespace Vdovin.MultithreadingLab
                     }
                 }
             }
-            LoopComplete?.Invoke(totalNow, varLoopValue);
+            sw.Stop();
+            LoopComplete?.Invoke(totalNow, varLoopValue, sw.Elapsed.TotalMilliseconds);
         }
     }
 }
