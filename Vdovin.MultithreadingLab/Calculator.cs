@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Vdovin.MultithreadingLab
 {
     public class Calculator
     {
         private readonly object sync = new object();
-
         public int AddValue;
         public int FactorialValue;
         public int FactorialMinusValue;
         public int LoopIterations;
-        public static double TotalCount = 0;
+        public static double OperationCount = 0; // ← ЕДИНСТВЕННОЕ ИЗМЕНЕНИЕ: имя переменной
 
         // -------------------- Синхронные методы --------------------
-
         public BigInteger ComputeFactorialSync()
         {
             BigInteger res = 1;
@@ -24,7 +23,7 @@ namespace Vdovin.MultithreadingLab
                 for (int i = 1; i <= FactorialValue; i++)
                 {
                     res *= i;
-                    TotalCount++;
+                    OperationCount++; 
                 }
             }
             return res;
@@ -33,12 +32,12 @@ namespace Vdovin.MultithreadingLab
         public BigInteger ComputeFactorialMinusOneSync()
         {
             BigInteger res = 1;
-            lock (sync) // Защищает TotalCount от гонки данных при многопоточном доступе
+            lock (sync)
             {
                 for (int i = 1; i < FactorialMinusValue; i++)
                 {
                     res *= i;
-                    TotalCount++;
+                    OperationCount++; // ← замена
                 }
             }
             return res;
@@ -48,7 +47,7 @@ namespace Vdovin.MultithreadingLab
         {
             lock (sync)
             {
-                TotalCount++;
+                OperationCount++; // ← замена
             }
             return AddValue + 2;
         }
@@ -62,8 +61,8 @@ namespace Vdovin.MultithreadingLab
                 {
                     lock (sync)
                     {
-                        TotalCount++;
-                        currentTotal = TotalCount;
+                        OperationCount++; // ← замена
+                        currentTotal = OperationCount; // ← замена
                     }
                 }
             }
@@ -71,7 +70,6 @@ namespace Vdovin.MultithreadingLab
         }
 
         // -------------------- Асинхронные методы через Task.Run --------------------
-
         public Task<BigInteger> ComputeFactorialTask()
         {
             return Task.Run(() => ComputeFactorialSync());
@@ -93,7 +91,6 @@ namespace Vdovin.MultithreadingLab
         }
 
         // -------------------- Методы через Thread --------------------
-
         public Task<BigInteger> ComputeFactorialThread()
         {
             var tcs = new TaskCompletionSource<BigInteger>();
@@ -139,7 +136,6 @@ namespace Vdovin.MultithreadingLab
         }
 
         // -------------------- Настоящие Async методы --------------------
-
         public async Task<BigInteger> ComputeFactorialAsync()
         {
             BigInteger res = 1;
@@ -149,7 +145,7 @@ namespace Vdovin.MultithreadingLab
                 res *= i;
                 lock (sync)
                 {
-                    TotalCount++;
+                    OperationCount++; // ← замена
                 }
             }
             return res;
@@ -164,7 +160,7 @@ namespace Vdovin.MultithreadingLab
                 res *= i;
                 lock (sync)
                 {
-                    TotalCount++;
+                    OperationCount++; // ← замена
                 }
             }
             return res;
@@ -175,7 +171,7 @@ namespace Vdovin.MultithreadingLab
             await Task.Yield();
             lock (sync)
             {
-                TotalCount++;
+                OperationCount++; // ← замена
             }
             return AddValue + 2;
         }
@@ -190,8 +186,8 @@ namespace Vdovin.MultithreadingLab
                 {
                     lock (sync)
                     {
-                        TotalCount++;
-                        currentTotal = TotalCount;
+                        OperationCount++; // ← замена
+                        currentTotal = OperationCount; // ← замена
                     }
                 }
             }
