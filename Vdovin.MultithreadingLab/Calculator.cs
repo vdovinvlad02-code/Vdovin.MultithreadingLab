@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -7,75 +6,196 @@ namespace Vdovin.MultithreadingLab
 {
     public class Calculator
     {
-        public int varAddTwo;
-        public int varFact1;
-        public int varFact2;
-        public int varLoopValue;
-        public double varTotalCalculations = 0; // ← УБРАН static
+        private readonly object sync = new object();
 
-        public async Task<BigInteger> ComputeFactorialAsync(int n)
+        public int AddValue;
+        public int FactorialValue;
+        public int FactorialMinusValue;
+        public int LoopIterations;
+        public static double TotalCount = 0;
+
+        // -------------------- Синхронные методы --------------------
+
+        public BigInteger ComputeFactorialSync()
         {
-            return await Task.Run(() =>
+            BigInteger res = 1;
+            lock (sync)
             {
-                BigInteger result = 1;
-                for (int i = 1; i <= n; i++)
+                for (int i = 1; i <= FactorialValue; i++)
                 {
-                    result *= i;
-                    lock (this)
-                    {
-                        varTotalCalculations++;
-                    }
+                    res *= i;
+                    TotalCount++;
                 }
-                return result;
-            });
+            }
+            return res;
         }
 
-        public async Task<BigInteger> ComputeFactorialMinusOneAsync(int n)
+        public BigInteger ComputeFactorialMinusOneSync()
         {
-            int limit = Math.Max(0, n - 1);
-            return await Task.Run(() =>
+            BigInteger res = 1;
+            lock (sync) // Защищает TotalCount от гонки данных при многопоточном доступе
             {
-                BigInteger result = 1;
-                for (int i = 1; i <= limit; i++)
+                for (int i = 1; i < FactorialMinusValue; i++)
                 {
-                    result *= i;
-                    lock (this)
-                    {
-                        varTotalCalculations++;
-                    }
+                    res *= i;
+                    TotalCount++;
                 }
-                return result;
-            });
+            }
+            return res;
         }
 
-        public async Task<int> ComputeAddTwoAsync(int value)
+        public int ComputeAddTwoSync()
         {
-            return await Task.Run(() =>
+            lock (sync)
             {
-                lock (this)
-                {
-                    varTotalCalculations++;
-                }
-                return value + 2;
-            });
+                TotalCount++;
+            }
+            return AddValue + 2;
         }
 
-        public async Task<double> ComputeLoopAsync(int iterations)
+        public double ExecuteLoopSync()
         {
-            return await Task.Run(() =>
+            double currentTotal = 0;
+            for (int i = 0; i < LoopIterations; i++)
             {
-                for (int i = 1; i <= iterations; i++)
+                for (int j = 0; j < 500; j++)
                 {
-                    for (int j = 1; j <= 500; j++)
+                    lock (sync)
                     {
-                        lock (this)
-                        {
-                            varTotalCalculations++;
-                        }
+                        TotalCount++;
+                        currentTotal = TotalCount;
                     }
                 }
-                return varTotalCalculations;
-            });
+            }
+            return currentTotal;
+        }
+
+        // -------------------- Асинхронные методы через Task.Run --------------------
+
+        public Task<BigInteger> ComputeFactorialTask()
+        {
+            return Task.Run(() => ComputeFactorialSync());
+        }
+
+        public Task<BigInteger> ComputeFactorialMinusOneTask()
+        {
+            return Task.Run(() => ComputeFactorialMinusOneSync());
+        }
+
+        public Task<int> ComputeAddTwoTask()
+        {
+            return Task.Run(() => ComputeAddTwoSync());
+        }
+
+        public Task<double> ExecuteLoopTask()
+        {
+            return Task.Run(() => ExecuteLoopSync());
+        }
+
+        // -------------------- Методы через Thread --------------------
+
+        public Task<BigInteger> ComputeFactorialThread()
+        {
+            var tcs = new TaskCompletionSource<BigInteger>();
+            new System.Threading.Thread(() =>
+            {
+                var res = ComputeFactorialSync();
+                tcs.SetResult(res);
+            }).Start();
+            return tcs.Task;
+        }
+
+        public Task<BigInteger> ComputeFactorialMinusOneThread()
+        {
+            var tcs = new TaskCompletionSource<BigInteger>();
+            new System.Threading.Thread(() =>
+            {
+                var res = ComputeFactorialMinusOneSync();
+                tcs.SetResult(res);
+            }).Start();
+            return tcs.Task;
+        }
+
+        public Task<int> ComputeAddTwoThread()
+        {
+            var tcs = new TaskCompletionSource<int>();
+            new System.Threading.Thread(() =>
+            {
+                var res = ComputeAddTwoSync();
+                tcs.SetResult(res);
+            }).Start();
+            return tcs.Task;
+        }
+
+        public Task<double> ExecuteLoopThread()
+        {
+            var tcs = new TaskCompletionSource<double>();
+            new System.Threading.Thread(() =>
+            {
+                var res = ExecuteLoopSync();
+                tcs.SetResult(res);
+            }).Start();
+            return tcs.Task;
+        }
+
+        // -------------------- Настоящие Async методы --------------------
+
+        public async Task<BigInteger> ComputeFactorialAsync()
+        {
+            BigInteger res = 1;
+            await Task.Yield();
+            for (int i = 1; i <= FactorialValue; i++)
+            {
+                res *= i;
+                lock (sync)
+                {
+                    TotalCount++;
+                }
+            }
+            return res;
+        }
+
+        public async Task<BigInteger> ComputeFactorialMinusOneAsync()
+        {
+            BigInteger res = 1;
+            await Task.Yield();
+            for (int i = 1; i < FactorialMinusValue; i++)
+            {
+                res *= i;
+                lock (sync)
+                {
+                    TotalCount++;
+                }
+            }
+            return res;
+        }
+
+        public async Task<int> ComputeAddTwoAsync()
+        {
+            await Task.Yield();
+            lock (sync)
+            {
+                TotalCount++;
+            }
+            return AddValue + 2;
+        }
+
+        public async Task<double> ExecuteLoopAsyncMethod()
+        {
+            double currentTotal = 0;
+            await Task.Yield();
+            for (int i = 0; i < LoopIterations; i++)
+            {
+                for (int j = 0; j < 500; j++)
+                {
+                    lock (sync)
+                    {
+                        TotalCount++;
+                        currentTotal = TotalCount;
+                    }
+                }
+            }
+            return currentTotal;
         }
     }
-}   
+}

@@ -1,43 +1,98 @@
 ﻿<Window x:Class="Vdovin.MultithreadingLab.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Сравнение подходов — одна кнопка" Height="500" Width="600">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+        Title="Лабораторная: Многопоточность" Height="420" Width="650"
+        Background="#f0f2f5"
+        FontFamily="Segoe UI">
 
-        <TextBlock Text="Введите число:" Grid.Row="0" VerticalAlignment="Center"/>
-        <TextBox x:Name="txtValue" Grid.Row="0" Grid.Column="1" Margin="5"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <Button Content="Запустить всё" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Click="BtnRunAll_Click"/>
+            <!-- Ввод -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+                <TextBlock Text="Введите целое число:" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                <TextBox x:Name="txtValue" Width="100" Margin="15,0,0,0" FontSize="14" Text="10" 
+                         HorizontalContentAlignment="Center" Padding="4"/>
+            </StackPanel>
 
-        <TextBlock Text="Однопоточно:" Grid.Row="2" VerticalAlignment="Center"/>
-        <TextBlock x:Name="lblSingle" Grid.Row="2" Grid.Column="1" TextWrapping="Wrap"/>
+            <!-- Кнопка -->
+            <Button Content="Запустить все методы" 
+                    Grid.Row="1" 
+                    Width="220" 
+                    Height="40" 
+                    HorizontalAlignment="Center"
+                    Margin="0,10"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Background="#4A6CF7"
+                    Foreground="White"
+                    Click="BtnAllMethods_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                Padding="15,5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3a5bf5"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
-        <TextBlock Text="Через Task:" Grid.Row="3" VerticalAlignment="Center"/>
-        <TextBlock x:Name="lblTask" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap"/>
+            <!-- Результаты -->
+            <Grid Grid.Row="2" Margin="0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-        <TextBlock Text="Асинхронно:" Grid.Row="4" VerticalAlignment="Center"/>
-        <TextBlock x:Name="lblAsync" Grid.Row="4" Grid.Column="1" TextWrapping="Wrap"/>
+                <!-- Левая колонка -->
+                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                    <Border Background="White" CornerRadius="8" Padding="12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="#ddd">
+                        <StackPanel>
+                            <TextBlock Text="Факториал (n!)" FontWeight="Bold" FontSize="13" Foreground="#2d3748"/>
+                            <TextBlock x:Name="lblFactorial" TextWrapping="Wrap" FontSize="12" Margin="0,5,0,0" Text="—"/>
+                        </StackPanel>
+                    </Border>
 
-        <TextBlock Text="Общее время:" Grid.Row="5" VerticalAlignment="Center"/>
-        <TextBlock x:Name="lblTotalTime" Grid.Row="5" Grid.Column="1" TextWrapping="Wrap"/>
+                    <Border Background="White" CornerRadius="8" Padding="12" BorderThickness="1" BorderBrush="#ddd">
+                        <StackPanel>
+                            <TextBlock Text="Добавить 2" FontWeight="Bold" FontSize="13" Foreground="#2d3748"/>
+                            <TextBlock x:Name="lblAddTwo" TextWrapping="Wrap" FontSize="12" Margin="0,5,0,0" Text="—"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
 
-        <TextBlock Text="Статус:" Grid.Row="6" VerticalAlignment="Center"/>
-        <TextBlock x:Name="lblStatus" Grid.Row="6" Grid.Column="1" TextWrapping="Wrap" Foreground="Gray"/>
+                <!-- Правая колонка -->
+                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                    <Border Background="White" CornerRadius="8" Padding="12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="#ddd">
+                        <StackPanel>
+                            <TextBlock Text="Факториал (n-1)!" FontWeight="Bold" FontSize="13" Foreground="#2d3748"/>
+                            <TextBlock x:Name="lblFactorialMinus" TextWrapping="Wrap" FontSize="12" Margin="0,5,0,0" Text="—"/>
+                        </StackPanel>
+                    </Border>
 
-        <TextBlock x:Name="lblDigits" Grid.Row="7" Grid.ColumnSpan="2" TextWrapping="Wrap" FontStyle="Italic"/>
-    </Grid>
+                    <Border Background="White" CornerRadius="8" Padding="12" BorderThickness="1" BorderBrush="#ddd">
+                        <StackPanel>
+                            <TextBlock Text="Цикл (500 × N)" FontWeight="Bold" FontSize="13" Foreground="#2d3748"/>
+                            <TextBlock x:Name="lblLoop" TextWrapping="Wrap" FontSize="12" Margin="0,5,0,0" Text="—"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>
