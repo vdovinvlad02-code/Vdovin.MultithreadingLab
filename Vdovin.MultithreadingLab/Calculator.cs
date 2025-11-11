@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -7,71 +6,74 @@ namespace Vdovin.MultithreadingLab
 {
     public class Calculator
     {
-        public int varAddTwo;
-        public int varFact1;
-        public int varFact2;
-        public int varLoopValue;
-        public double varTotalCalculations = 0; // ← УБРАН static
+        public double varTotalCalculations = 0;
 
-        public async Task<BigInteger> ComputeFactorialAsync(int n)
+        // Универсальный метод: принимает делегат, оборачивает в Task и считает операции
+        private async Task<T> RunComputationAsync<T>(Func<T> computation)
         {
             return await Task.Run(() =>
             {
-                BigInteger result = 1;
+                // Выполняем делегат
+                return computation.Invoke(); 
+            });
+        }
+
+        // Вспомогательный метод для потокобезопасного инкремента
+        private void IncrementCounter(int count = 1)
+        {
+            lock (this)
+            {
+                varTotalCalculations += count;
+            }
+        }
+
+        public Task<BigInteger> ComputeFactorialAsync(int n)
+        {
+            return RunComputationAsync(() =>
+            {
+                BigInteger res = 1;
                 for (int i = 1; i <= n; i++)
                 {
-                    result *= i;
-                    lock (this)
-                    {
-                        varTotalCalculations++;
-                    }
+                    res *= i;
+                    IncrementCounter();
                 }
-                return result;
+                return res;
             });
         }
 
-        public async Task<BigInteger> ComputeFactorialMinusOneAsync(int n)
+        public Task<BigInteger> ComputeFactorialMinusOneAsync(int n)
         {
             int limit = Math.Max(0, n - 1);
-            return await Task.Run(() =>
+            return RunComputationAsync(() =>
             {
-                BigInteger result = 1;
+                BigInteger res = 1;
                 for (int i = 1; i <= limit; i++)
                 {
-                    result *= i;
-                    lock (this)
-                    {
-                        varTotalCalculations++;
-                    }
+                    res *= i;
+                    IncrementCounter();
                 }
-                return result;
+                return res;
             });
         }
 
-        public async Task<int> ComputeAddTwoAsync(int value)
+        public Task<int> ComputeAddTwoAsync(int value)
         {
-            return await Task.Run(() =>
+            return RunComputationAsync(() =>
             {
-                lock (this)
-                {
-                    varTotalCalculations++;
-                }
+                IncrementCounter();
                 return value + 2;
             });
         }
 
-        public async Task<double> ComputeLoopAsync(int iterations)
+        public Task<double> ComputeLoopAsync(int iterations)
         {
-            return await Task.Run(() =>
+            return RunComputationAsync(() =>
             {
                 for (int i = 1; i <= iterations; i++)
                 {
                     for (int j = 1; j <= 500; j++)
                     {
-                        lock (this)
-                        {
-                            varTotalCalculations++;
-                        }
+                        IncrementCounter();
                     }
                 }
                 return varTotalCalculations;
